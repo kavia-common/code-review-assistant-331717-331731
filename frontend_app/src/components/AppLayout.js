@@ -1,26 +1,18 @@
 import React, { useMemo } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { IconCode, IconHistory, IconLogout, IconSparkles } from "./Icons";
+import { NavLink, useLocation } from "react-router-dom";
+import { IconHistory, IconSparkles } from "./Icons";
 
 /** PUBLIC_INTERFACE */
 export function AppLayout({ children }) {
-  /** Shell layout used by authenticated pages. */
-  const { user, logout } = useAuth();
+  /** Shell layout used by application pages (no authentication). */
   const location = useLocation();
-  const navigate = useNavigate();
 
   const pageMeta = useMemo(() => {
     const p = location.pathname;
-    if (p.startsWith("/history")) return { title: "Review history", subtitle: "Browse your previous code reviews." };
+    if (p.startsWith("/history")) return { title: "Review history", subtitle: "Browse previous code reviews." };
     if (p.startsWith("/review/")) return { title: "Review details", subtitle: "See structured feedback and suggestions." };
     return { title: "New review", subtitle: "Submit code and get AI-powered feedback." };
   }, [location.pathname]);
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
 
   return (
     <div className="appShell">
@@ -34,21 +26,14 @@ export function AppLayout({ children }) {
         </div>
 
         <nav className="navGroup" aria-label="Primary">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) => `navItem ${isActive ? "navItemActive" : ""}`}
-          >
+          <NavLink to="/" end className={({ isActive }) => `navItem ${isActive ? "navItemActive" : ""}`}>
             <span className="navIcon">
               <IconSparkles />
             </span>
             New review
           </NavLink>
 
-          <NavLink
-            to="/history"
-            className={({ isActive }) => `navItem ${isActive ? "navItemActive" : ""}`}
-          >
+          <NavLink to="/history" className={({ isActive }) => `navItem ${isActive ? "navItemActive" : ""}`}>
             <span className="navIcon">
               <IconHistory />
             </span>
@@ -57,21 +42,10 @@ export function AppLayout({ children }) {
         </nav>
 
         <div className="sidebarFooter">
-          <div className="userCard">
-            <strong>{user?.name || user?.email || "Signed in"}</strong>
-            <span>{user?.email || "Authenticated session"}</span>
-          </div>
-
-          <button className="btn btnDanger" onClick={handleLogout} type="button">
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-              <IconLogout />
-              Sign out
-            </span>
-          </button>
-
-          <div style={{ display: "flex", gap: 8, alignItems: "center", color: "#64748b", fontSize: 12 }}>
-            <IconCode />
-            Token auth enabled
+          <div style={{ color: "#64748b", fontSize: 12, lineHeight: 1.4 }}>
+            Authentication disabled.
+            <br />
+            Reviews are accessed directly.
           </div>
         </div>
       </aside>

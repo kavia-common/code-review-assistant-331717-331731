@@ -1,5 +1,4 @@
 import { getApiBaseUrl } from "../config";
-import { getAuthToken, setAuthToken } from "./authStorage";
 
 /**
  * Normalizes fetch errors to a consistent shape the UI can render.
@@ -26,11 +25,9 @@ async function readJsonSafe(res) {
   }
 }
 
-async function request(path, { method = "GET", body, token, signal } = {}) {
+async function request(path, { method = "GET", body, signal } = {}) {
   const baseUrl = getApiBaseUrl();
   const url = `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
-
-  const authToken = token ?? getAuthToken();
 
   const headers = {
     Accept: "application/json",
@@ -38,9 +35,6 @@ async function request(path, { method = "GET", body, token, signal } = {}) {
 
   if (body !== undefined) {
     headers["Content-Type"] = "application/json";
-  }
-  if (authToken) {
-    headers.Authorization = `Bearer ${authToken}`;
   }
 
   let res;
@@ -69,48 +63,26 @@ async function request(path, { method = "GET", body, token, signal } = {}) {
 }
 
 /**
- * NOTE: Backend OpenAPI published at /docs is incomplete (only health endpoint).
- * We implement endpoints per work-item interface list:
- * POST /auth/signup, POST /auth/login, POST /review, GET /reviews, GET /review/:id
+ * Endpoints in use (authentication removed):
+ * POST /review, GET /reviews, GET /review/:id
  *
  * If the backend uses different paths, update these in one place.
  */
-
 const endpoints = {
-  signup: "/auth/signup",
-  login: "/auth/login",
   createReview: "/review",
   listReviews: "/reviews",
   getReview: (id) => `/review/${encodeURIComponent(id)}`,
 };
 
 /** PUBLIC_INTERFACE */
-export async function apiSignup({ email, password, name }) {
-  /** Creates a user account. Expected response may include token and user. */
-  return request(endpoints.signup, { method: "POST", body: { email, password, name } });
-}
-
-/** PUBLIC_INTERFACE */
-export async function apiLogin({ email, password }) {
-  /** Logs in and stores returned token if present. */
-  const data = await request(endpoints.login, { method: "POST", body: { email, password } });
-
-  // Try common token shapes.
-  const token = data?.token || data?.accessToken || data?.jwt;
-  if (token) setAuthToken(token);
-
-  return data;
-}
-
-/** PUBLIC_INTERFACE */
 export async function apiCreateReview({ language, code }) {
-  /** Submits code for AI review. Requires auth token. */
+  /** Submits code for AI review. */
   return request(endpoints.createReview, { method: "POST", body: { language, code } });
 }
 
 /** PUBLIC_INTERFACE */
 export async function apiListReviews() {
-  /** Fetches the authenticated user's review history. */
+  /** Fetches review history. */
   return request(endpoints.listReviews, { method: "GET" });
 }
 

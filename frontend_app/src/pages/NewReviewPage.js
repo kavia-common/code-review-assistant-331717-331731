@@ -183,7 +183,7 @@ export function NewReviewPage() {
           </div>
 
           <div style={{ marginTop: 12, color: "#64748b", fontSize: 12, lineHeight: 1.5 }}>
-            If you see 401/403 errors, your token may be invalid—sign out and log in again.
+            If you see authorization errors (401/403), ensure the backend is configured for unauthenticated access.
           </div>
         </div>
       </div>
